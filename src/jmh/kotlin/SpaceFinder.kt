@@ -19,7 +19,7 @@ open class SpaceFinder {
     companion object {
         const val EOL_BYTE = '\n'.code.toByte()
 
-        @JvmStatic
+        @JvmField
         val BYTE_HANDLE: VarHandle = MemoryHandles.varHandle(Byte::class.java, ByteOrder.nativeOrder())
 
     }

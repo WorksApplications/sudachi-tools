@@ -19,7 +19,7 @@ class SudachiRuntime(private val classloader: ClassLoader, config: SudachiRuntim
         val factory = sudachiFactory.getDeclaredConstructor().newInstance() as DictionaryFactory
         if (config.sudachiConfigFile != null) {
             val cfgData = config.sudachiConfigFile.readText()
-            factory.create(config.sudachiConfigFile.parent.toString(), cfgData, true)
+            factory.create(config.sudachiConfigFile.parent.toString(), cfgData, false)
         } else {
             factory.create(config.sudachiConfigFile?.parent.toString(), config.addSettings, true)
         }

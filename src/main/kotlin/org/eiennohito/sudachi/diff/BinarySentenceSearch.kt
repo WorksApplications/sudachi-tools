@@ -10,6 +10,7 @@ class BinarySentenceSearch {
 
     companion object {
         const val EOL = '\n'.code.toByte()
+
         // taken from MurmurHash
         const val MULT1 = 0xcc9e2d51L
         const val MULT2 = 0x1b873593L
@@ -37,7 +38,7 @@ class BinarySentenceSearch {
         for (i in start until dataEnd) {
             val b = array[i]
             if (b == EOL) {
-                end = i
+                end = i + 1
                 return hash
             }
             val hashPart = ((count.toLong() shl 32) or b.toLong()) * MULT1
@@ -46,5 +47,15 @@ class BinarySentenceSearch {
         }
         end = data.size
         return hash
+    }
+
+    fun isEos(): Boolean {
+        val idx = start
+        val d = data
+        return end - start == 4 &&
+                d[idx + 0].toInt() == 'E'.code &&
+                d[idx + 1].toInt() == 'O'.code &&
+                d[idx + 2].toInt() == 'S'.code &&
+                d[idx + 3].toInt() == '\n'.code
     }
 }

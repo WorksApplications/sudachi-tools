@@ -1,8 +1,11 @@
 package org.eiennohito.sudachi.diff
 
 import kotlinx.cli.*
+import java.nio.file.Files
 import java.nio.file.Path
+import java.util.function.BiPredicate
 import java.util.logging.LogManager
+import kotlin.io.path.name
 import kotlin.io.path.notExists
 
 private fun String.existingPath(): Path {
@@ -39,8 +42,34 @@ object Main {
             }
         }
 
+        class Diff: Subcommand("diff", "format diff file with results") {
+            val input1 by argument(
+                ArgType.String,
+                description = "folder with zstd compressed files produced by analyze step"
+            )
 
-        parser.subcommands(Analyze())
+            val input2 by argument(
+                ArgType.String,
+                description = "folder with zstd compressed files produced by analyze step"
+            )
+
+            val output by argument(
+                ArgType.String,
+                description = "resulting diff htmls will be outputted here"
+            )
+
+            override fun execute() {
+                val leftRoot = input1.existingPath()
+                val differ = DiffProcessManager(leftRoot, input2.existingPath(), Path.of(output))
+                Files.find(leftRoot, Int.MAX_VALUE, { p, attrs -> attrs.isRegularFile && p.name.endsWith(".txt.zstd") }).use { s ->
+                    s.forEach { differ.enqueue(it) }
+                }
+                differ.waitForCompletion()
+            }
+        }
+
+
+        parser.subcommands(Analyze(), Diff())
         parser.parse(args)
     }
 }

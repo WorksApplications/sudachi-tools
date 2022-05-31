@@ -1,0 +1,11 @@
+html {
+    font-family: "Meiryo", "sans-serif";
+}
+
+.diff-lvl-0 > .diff-left {
+    color: limegreen;
+}
+
+.diff-lvl-0 > .diff-right {
+    color: red;
+}

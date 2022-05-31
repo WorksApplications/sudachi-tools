@@ -8,9 +8,7 @@ import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.createDirectories
-import kotlin.io.path.inputStream
-import kotlin.io.path.outputStream
+import kotlin.io.path.*
 
 
 private fun PrintWriter.printt(data: String) {
@@ -42,9 +40,10 @@ class SudachiAnalyzer(runtime: SudachiRuntime, mode: String = "C"): SuAnalyzer {
             writer.printt(pos[2])
             writer.printt(pos[3])
             writer.printt(pos[4])
-            writer.println(pos[5])
+            writer.print(pos[5])
+            writer.print("\n") // java outputs \r\n on windows otherwise
         }
-        writer.println("EOS")
+        writer.print("EOS\n")
     }
 
     @Suppress("UnstableApiUsage")
@@ -53,6 +52,7 @@ class SudachiAnalyzer(runtime: SudachiRuntime, mode: String = "C"): SuAnalyzer {
             ByteStreams.skipFully(is0, start)
             val limited = ByteStreams.limit(is0, end - start)
             output.parent.createDirectories()
+            output.deleteIfExists()
             val os = output.outputStream(StandardOpenOption.WRITE, StandardOpenOption.CREATE)
             ZstdOutputStreamNoFinalizer(os).use { compressed ->
                 process(limited, compressed)
