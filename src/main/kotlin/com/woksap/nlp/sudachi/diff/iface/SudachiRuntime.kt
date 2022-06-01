@@ -1,11 +1,11 @@
-package org.eiennohito.sudachi.diff.iface
+package com.woksap.nlp.sudachi.diff.iface
 
+import com.woksap.nlp.sudachi.diff.*
 import com.worksap.nlp.sudachi.Dictionary
 import com.worksap.nlp.sudachi.DictionaryFactory
 import com.worksap.nlp.sudachi.Morpheme
 import com.worksap.nlp.sudachi.Tokenizer.SplitMode
 import com.worksap.nlp.sudachi.dictionary.WordInfo
-import org.eiennohito.sudachi.diff.*
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
 import java.nio.file.Files

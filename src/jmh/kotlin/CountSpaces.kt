@@ -14,8 +14,7 @@ import java.util.*
 @BenchmarkMode(Mode.Throughput)
 @Measurement(iterations = 3)
 @Warmup(iterations = 2)
-open class SpaceFinder {
-
+open class CountSpaces {
     companion object {
         const val EOL_BYTE = '\n'.code.toByte()
 

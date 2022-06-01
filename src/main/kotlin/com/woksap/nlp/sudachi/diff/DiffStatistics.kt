@@ -1,8 +1,8 @@
-package org.eiennohito.sudachi.diff
+package com.woksap.nlp.sudachi.diff
 
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
-import org.eiennohito.sudachi.diff.DiffDetails.Companion.renderDiff
+import com.woksap.nlp.sudachi.diff.DiffDetails.Companion.renderDiff
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.*
 import kotlin.io.path.outputStream

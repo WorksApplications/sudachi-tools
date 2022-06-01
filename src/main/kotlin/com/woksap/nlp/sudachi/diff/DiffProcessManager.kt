@@ -1,4 +1,4 @@
-package org.eiennohito.sudachi.diff
+package com.woksap.nlp.sudachi.diff
 
 import com.github.luben.zstd.ZstdInputStreamNoFinalizer
 import com.google.common.io.ByteStreams

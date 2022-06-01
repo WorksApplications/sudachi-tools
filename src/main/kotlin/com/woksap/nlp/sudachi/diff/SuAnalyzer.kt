@@ -1,4 +1,4 @@
-package org.eiennohito.sudachi.diff
+package com.woksap.nlp.sudachi.diff
 
 import java.nio.file.Path
 

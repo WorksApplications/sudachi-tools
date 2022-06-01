@@ -1,4 +1,4 @@
-package org.eiennohito.sudachi.diff
+package com.woksap.nlp.sudachi.diff
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -123,15 +123,14 @@ class DiffCalculatorTest {
 
     @Test
     fun diffEmpty() {
-        val left = listOf(token("a"), token(""))
-        val right = listOf(token("a"))
+        val left = listOf(token("a"), token(""), SudachiToken.EOS)
+        val right = listOf(token("A"), SudachiToken.EOS)
         val diff = DiffCalculator(left, right).compute()
-        assertEquals(2, diff.size)
-        val el0 = assertIs<Equal>(diff[0])
-        assertEquals(1, el0.tokens.size)
-        val el1 = assertIs<Both>(diff[1])
-        assertEquals(2, el1.left.size)
-        assertEquals(2, el1.right.size)
+        assertEquals(1, diff.size)
+        assertIs<Both>(diff[0]).let {
+            assertEquals(2, it.left.size)
+            assertEquals(1, it.right.size)
+        }
     }
 
     @Test

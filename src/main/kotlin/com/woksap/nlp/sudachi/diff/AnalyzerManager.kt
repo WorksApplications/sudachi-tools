@@ -1,7 +1,7 @@
-package org.eiennohito.sudachi.diff
+package com.woksap.nlp.sudachi.diff
 
 import kotlinx.coroutines.*
-import org.eiennohito.sudachi.diff.iface.SudachiRuntime
+import com.woksap.nlp.sudachi.diff.iface.SudachiRuntime
 import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.*

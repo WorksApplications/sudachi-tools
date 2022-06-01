@@ -1,14 +1,16 @@
-package org.eiennohito.sudachi.diff.iface
+package com.woksap.nlp.sudachi.diff.iface
 
 import com.github.luben.zstd.ZstdOutputStreamNoFinalizer
 import com.google.common.io.ByteStreams
-import com.worksap.nlp.sudachi.MorphemeList
-import org.eiennohito.sudachi.diff.SuAnalyzer
+import com.woksap.nlp.sudachi.diff.SuAnalyzer
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.*
+import kotlin.io.path.createDirectories
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 
 
 private fun PrintWriter.printt(data: String) {

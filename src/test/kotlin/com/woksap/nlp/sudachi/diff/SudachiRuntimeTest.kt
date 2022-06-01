@@ -1,6 +1,6 @@
-package org.eiennohito.sudachi.diff
+package com.woksap.nlp.sudachi.diff
 
-import org.eiennohito.sudachi.diff.iface.SudachiRuntime
+import com.woksap.nlp.sudachi.diff.iface.SudachiRuntime
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
