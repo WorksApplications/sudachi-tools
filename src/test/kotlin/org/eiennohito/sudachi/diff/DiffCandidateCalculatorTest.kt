@@ -122,6 +122,19 @@ class DiffCalculatorTest {
     }
 
     @Test
+    fun diffEmpty() {
+        val left = listOf(token("a"), token(""))
+        val right = listOf(token("a"))
+        val diff = DiffCalculator(left, right).compute()
+        assertEquals(2, diff.size)
+        val el0 = assertIs<Equal>(diff[0])
+        assertEquals(1, el0.tokens.size)
+        val el1 = assertIs<Both>(diff[1])
+        assertEquals(2, el1.left.size)
+        assertEquals(2, el1.right.size)
+    }
+
+    @Test
     fun bug01() {
         val data = Diff("""０８	08	レイハチ	名詞	数詞	*	*	*	*
 ＢＤ	BD	ビーディー	名詞	普通名詞	一般	*	*	*

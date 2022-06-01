@@ -98,7 +98,9 @@ data class Diff(val left: String, val right: String): SentenceDiff {
     }
 
     private fun parseTokens(data: String): List<SudachiToken> {
-        return data.lines().filter { it.isNotBlank() && it != "EOS" }.map { SudachiToken.parse(it) }
+        val tokens = data.lines().filter { it.isNotBlank() && it != "EOS" }.mapTo(ArrayList()) { SudachiToken.parse(it) }
+        tokens.add(SudachiToken.EOS)
+        return tokens
     }
 }
 
@@ -120,9 +122,18 @@ class DiffCalculator(private val left: List<SudachiToken>, private val right: Li
     private var result = ArrayList<DiffSpan>()
 
     private fun maybeFinalizeSpan() {
+        if (leftBuf.lastOrNull() === SudachiToken.EOS) {
+            leftBuf.removeAt(leftBuf.size - 1)
+        }
+
+        if (rightBuf.lastOrNull() === SudachiToken.EOS) {
+            rightBuf.removeAt(rightBuf.size - 1)
+        }
+
         if (leftBuf.isEmpty() && rightBuf.isEmpty()) {
             return
         }
+
 
         when (state) {
             State.EQ -> {
@@ -229,6 +240,10 @@ data class SudachiToken(
             "POS4",
             "POS5",
             "POS6",
+        )
+
+        val EOS = SudachiToken(
+            "EOS", "", "", "", "", "", "", "", ""
         )
 
         fun parse(data: String): SudachiToken {
