@@ -15,6 +15,51 @@ class DiffDetails(private val outputPath: Path, private val resources: Path) {
     private val stored = ArrayList<SentenceDiffState>()
     private val result = ArrayList<ProcessedSpan>()
 
+    companion object {
+        inline fun SPAN.renderTokens(
+            tokens: List<SudachiToken>,
+            block: SPAN.(SudachiToken) -> Unit,
+            separator: SPAN.() -> Unit
+        ) {
+            tokens.forEachIndexed { idx, token ->
+                block(this, token)
+                if (idx != tokens.size - 1) {
+                    separator(this)
+                }
+            }
+        }
+
+        fun DIV.renderDiff(left: List<SudachiToken>, right: List<SudachiToken>, level: Int) {
+            if (level == 0) {
+                span("diff-lvl diff-lvl-0") {
+                    +"["
+                    span("diff-left") {
+                        renderTokens(left, { +it.surface }, { span("tok-sep") { +"¦" } })
+                    }
+                    +"/"
+                    span("diff-right") {
+                        renderTokens(right, { +it.surface }, { span("tok-sep") { +"¦" } })
+                    }
+                    +"]"
+                }
+            } else {
+                span("diff-lvl diff-lvl-$level") {
+                    +"["
+                    renderTokens(left, { +it.surface }, { span("tok-sep") { +"¦" } })
+                    + " $level: "
+                    span("diff-left") {
+                        renderTokens(left, { +it.component(level) }, { span("tok-sep") { +"¦" } })
+                    }
+                    +"/"
+                    span("diff-right") {
+                        renderTokens(right, { +it.component(level) }, { span("tok-sep") { +"¦" } })
+                    }
+                    +"]"
+                }
+            }
+        }
+    }
+
     private fun writeHtml() {
         if (stored.isEmpty()) {
             return
@@ -23,7 +68,8 @@ class DiffDetails(private val outputPath: Path, private val resources: Path) {
         outputPath.parent.createDirectories()
         outputPath.deleteIfExists()
 
-        val out = outputPath.bufferedWriter(Charsets.UTF_8, 32 * 1024, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+        val out =
+            outputPath.bufferedWriter(Charsets.UTF_8, 32 * 1024, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
 
         out.appendHTML().html {
             lang = "ja"
@@ -42,7 +88,8 @@ class DiffDetails(private val outputPath: Path, private val resources: Path) {
                             sent.parts.forEachIndexed { pidx, span ->
                                 when (span) {
                                     is Both -> {
-                                        val lvl = renderDiff(span.left, span.right)
+                                        val lvl = diffLevel(span.left, span.right)
+                                        renderDiff(span.left, span.right, lvl)
                                         result.add(ProcessedSpan(sentId, span, lvl))
                                     }
                                     is Equal -> renderSame(span.tokens)
@@ -64,29 +111,6 @@ class DiffDetails(private val outputPath: Path, private val resources: Path) {
         }
     }
 
-    private fun DIV.renderDiff(left: List<SudachiToken>, right: List<SudachiToken>): Int {
-        val level = diffLevel(left, right)
-        if (level == 0) {
-            span("diff-lvl diff-lvl-0") {
-                +"["
-                span("diff-left") { +left.joinToString(" ") { it.surface } }
-                +"/"
-                span("diff-right") { +right.joinToString(" ") { it.surface } }
-                +"]"
-            }
-        } else {
-            span("diff-lvl diff-lvl-$level") {
-                span("diff-surface") { +left.joinToString(" ") { it.surface } }
-                +"$level:["
-                span("diff-left") { +left.joinToString(" ") { it.component(level) } }
-                +"/"
-                span("diff-right") { +right.joinToString(" ") { it.component(level) } }
-                +"]"
-            }
-        }
-
-        return level
-    }
 
     private fun diffLevel(left: List<SudachiToken>, right: List<SudachiToken>): Int {
         if (left.size != right.size) {

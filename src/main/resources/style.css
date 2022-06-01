@@ -9,3 +9,22 @@ html {
 .diff-lvl-0 > .diff-right {
     color: red;
 }
+
+span.tok-sep {
+    color: grey;
+}
+
+.index-wrapper {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+}
+
+ul.index-nav-list {
+    list-style: none;
+    position: sticky;
+    top: 10px
+}
+
+div.summary-links > a {
+    margin: 1px;
+}

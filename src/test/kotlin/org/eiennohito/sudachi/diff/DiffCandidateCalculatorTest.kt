@@ -120,4 +120,38 @@ class DiffCalculatorTest {
         assertEquals(2, el1.left.size)
         assertEquals(2, el1.right.size)
     }
+
+    @Test
+    fun bug01() {
+        val data = Diff("""０８	08	レイハチ	名詞	数詞	*	*	*	*
+ＢＤ	BD	ビーディー	名詞	普通名詞	一般	*	*	*
+−	−	キゴウ	補助記号	一般	*	*	*	*
+四十八	四十八	シトヤ	名詞	固有名詞	人名	名	*	*
+Ｂ０Ｂ	十		補助記号	一般	*	*	*	*
+六百九十八	六百九十八	ロクヒャクキュウジュウハチ	名詞	数詞	*	*	*	*
+EOS
+""".trimIndent(),
+        """０８	08	レイハチ	名詞	数詞	*	*	*	*
+ＢＤ	BD	ビーディー	名詞	普通名詞	一般	*	*	*
+−	−	キゴウ	補助記号	一般	*	*	*	*
+四十八	四十八	ヨンジュウハチ	名詞	数詞	*	*	*	*
+Ｂ	b		名詞	普通名詞	一般	*	*	*
+０	0		ゼロ	名詞	数詞	*	*	*	*
+Ｂ	b		名詞	普通名詞	一般	*	*	*
+六百九十八	六百九十八	ロクヒャクキュウジュウハチ	名詞	数詞	*	*	*	*
+EOS
+""".trimIndent())
+        val spans = data.computeSpans()
+        assertEquals(4, spans.size)
+        assertIs<Equal>(spans[0]).let { assertEquals(3, it.tokens.size) }
+        assertIs<Both>(spans[1]).let {
+            assertEquals(1, it.left.size)
+            assertEquals(1, it.right.size)
+        }
+        assertIs<Both>(spans[2]).let {
+            assertEquals(1, it.left.size)
+            assertEquals(3, it.right.size)
+        }
+        assertIs<Equal>(spans[3]).let { assertEquals(1, it.tokens.size) }
+    }
 }

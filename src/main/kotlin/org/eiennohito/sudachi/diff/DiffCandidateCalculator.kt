@@ -150,6 +150,7 @@ class DiffCalculator(private val left: List<SudachiToken>, private val right: Li
         var j = 0
         var leftLengthFinished = 0
         var rightLengthFinished = 0
+        var lastLevel = Int.MAX_VALUE
         while (i < left.size || j < right.size) {
             val lt = left[i]
             val rt = right[j]
@@ -169,6 +170,13 @@ class DiffCalculator(private val left: List<SudachiToken>, private val right: Li
             if (state != State.BOTH) {
                 maybeFinalizeSpan()
                 state = State.BOTH
+                lastLevel = lt.diffLevel(rt)
+            }
+
+            val curLevel = lt.diffLevel(rt)
+            if (lastLevel != curLevel) {
+                maybeFinalizeSpan()
+                lastLevel = curLevel
             }
 
             val leftLength = leftLengthFinished + lt.surface.length
@@ -209,8 +217,22 @@ data class SudachiToken(
     val pos6: String,
 ) {
     companion object {
+        const val MAX_LEVEL: Int = 9
+
+        val LevelNames = arrayOf(
+            "Surface",
+            "Normalized Form",
+            "Reading",
+            "POS1",
+            "POS2",
+            "POS3",
+            "POS4",
+            "POS5",
+            "POS6",
+        )
+
         fun parse(data: String): SudachiToken {
-            val parts = data.split('\t', limit = 9)
+            val parts = data.split('\t', limit = MAX_LEVEL)
             return SudachiToken(
                 parts[0],
                 parts[1],

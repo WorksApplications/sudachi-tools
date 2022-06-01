@@ -48,9 +48,9 @@ class SudachiAnalyzer(runtime: SudachiRuntime, mode: String = "C"): SuAnalyzer {
 
     @Suppress("UnstableApiUsage")
     override fun analyze(input: Path, start: Long, end: Long, output: Path) {
-        input.inputStream(StandardOpenOption.READ).use { is0 ->
-            ByteStreams.skipFully(is0, start)
-            val limited = ByteStreams.limit(is0, end - start)
+        input.inputStream(StandardOpenOption.READ).use { inRaw ->
+            ByteStreams.skipFully(inRaw, start)
+            val limited = ByteStreams.limit(inRaw, end - start)
             output.parent.createDirectories()
             output.deleteIfExists()
             val os = output.outputStream(StandardOpenOption.WRITE, StandardOpenOption.CREATE)
