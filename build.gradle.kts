@@ -7,8 +7,8 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-group = "org.eiennohito"
-version = "0.1-SNAPSHOT"
+group = "com.worskap.nlp"
+version = "0.2-SNAPSHOT"
 
 repositories {
     mavenCentral()

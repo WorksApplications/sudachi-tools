@@ -1,3 +1,2 @@
-
-rootProject.name = "sudachi-diff"
+rootProject.name = "sudachi-tools"
 
