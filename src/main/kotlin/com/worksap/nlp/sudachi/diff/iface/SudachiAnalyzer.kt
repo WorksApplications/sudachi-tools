@@ -1,8 +1,8 @@
-package com.woksap.nlp.sudachi.diff.iface
+package com.worksap.nlp.sudachi.diff.iface
 
 import com.github.luben.zstd.ZstdOutputStreamNoFinalizer
 import com.google.common.io.ByteStreams
-import com.woksap.nlp.sudachi.diff.SuAnalyzer
+import com.worksap.nlp.sudachi.diff.SuAnalyzer
 import java.io.*
 import java.nio.charset.StandardCharsets
 import java.nio.file.Path

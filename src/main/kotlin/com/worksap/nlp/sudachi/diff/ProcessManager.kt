@@ -1,9 +1,6 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.time.Duration
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.ThreadFactory
@@ -55,7 +52,7 @@ abstract class ProcessManager {
             val remaining = Duration.ofMillis((remainingSeconds * 1000).toLong())
             val eplacedString = formatDuration(eplased)
             val remainingString = formatDuration(remaining)
-            System.err.print("\r$eplacedString: [${enqueued.get()}, ${inFlight.get()}, ${completed.get()}], R:${remainingString}")
+            System.err.print("\r$eplacedString: [${enqueued.get()}, ${inFlight.get()}, ${completed.get()}], R:${remainingString}     ")
         }
     }
 

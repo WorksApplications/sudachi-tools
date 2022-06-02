@@ -1,4 +1,4 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import java.nio.file.Path
 
@@ -8,4 +8,5 @@ interface SuAnalyzer {
 
 interface SuRuntime {
     fun analyzer(mode: String = "C"): SuAnalyzer
+    fun run(input: Path, output: Path): Unit
 }

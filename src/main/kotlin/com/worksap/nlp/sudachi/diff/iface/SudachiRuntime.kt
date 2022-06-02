@@ -1,11 +1,11 @@
-package com.woksap.nlp.sudachi.diff.iface
+package com.worksap.nlp.sudachi.diff.iface
 
-import com.woksap.nlp.sudachi.diff.*
 import com.worksap.nlp.sudachi.Dictionary
 import com.worksap.nlp.sudachi.DictionaryFactory
 import com.worksap.nlp.sudachi.Morpheme
 import com.worksap.nlp.sudachi.Tokenizer.SplitMode
 import com.worksap.nlp.sudachi.dictionary.WordInfo
+import com.worksap.nlp.sudachi.diff.*
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
 import java.nio.file.Files
@@ -19,7 +19,7 @@ class SudachiRuntime(private val classloader: ClassLoader, config: SudachiRuntim
         val factory = sudachiFactory.getDeclaredConstructor().newInstance() as DictionaryFactory
         if (config.sudachiConfigFile != null) {
             val cfgData = config.sudachiConfigFile.readText()
-            factory.create(config.sudachiConfigFile.parent.toString(), cfgData, false)
+            factory.create(config.sudachiConfigFile.parent.toString(), cfgData, true)
         } else {
             factory.create(config.sudachiConfigFile?.parent.toString(), config.addSettings, true)
         }
@@ -40,8 +40,7 @@ class SudachiRuntime(private val classloader: ClassLoader, config: SudachiRuntim
         return SplitMode.valueOf(mode)
     }
 
-    // entry point, is called via reflection
-    fun run(input: Path, output: Path) {
+    override fun run(input: Path, output: Path) {
         val segmenter = FileSegmenter(5 * 1024 * 1024, 32 * 1024)
         val analyzer = AnalyzerManager(this, segmenter, input, output)
         Files.find(input, Int.MAX_VALUE, { p, attrs -> attrs.isRegularFile && p.name.endsWith(".txt") }).use {

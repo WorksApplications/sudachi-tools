@@ -38,6 +38,6 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<ShadowJar> {
     manifest {
-        attributes["Main-Class"] = "com.woksap.nlp.sudachi.diff.Main"
+        attributes["Main-Class"] = "com.worksap.nlp.sudachi.diff.Main"
     }
 }

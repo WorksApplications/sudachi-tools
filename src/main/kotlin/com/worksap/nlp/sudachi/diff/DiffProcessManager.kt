@@ -1,4 +1,4 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import com.github.luben.zstd.ZstdInputStreamNoFinalizer
 import com.google.common.io.ByteStreams
@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.io.path.*
 
 
@@ -77,12 +78,15 @@ class DiffProcessManager(private val leftInputRoot: Path, private val rightInput
 
     override fun waitForCompletion() {
         val diffStatistics = DiffStatistics(outputRoot)
+        val numWritten = AtomicInteger(0)
         try {
             runBlocking(Dispatchers.Unconfined) {
                 while (true) {
                     val packed = chan.tryReceive()
                     if (packed.isSuccess) {
-                        diffStatistics.handle(packed.getOrThrow())
+                        val pack = packed.getOrThrow()
+                        numWritten.addAndGet(pack.diffs.size)
+                        diffStatistics.handle(pack)
                     } else if (packed.isFailure && filesInProgress.get() == 0L) {
                         break
                     } else {
@@ -96,6 +100,10 @@ class DiffProcessManager(private val leftInputRoot: Path, private val rightInput
         } finally {
             chan.close()
             executor.close()
+        }
+
+        if (numWritten.get() == 0) {
+            println("\rCompletely Identical!              ")
         }
     }
 

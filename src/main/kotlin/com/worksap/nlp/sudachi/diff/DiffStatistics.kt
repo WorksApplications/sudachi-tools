@@ -1,12 +1,11 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
-import com.woksap.nlp.sudachi.diff.DiffDetails.Companion.renderDiff
+import com.worksap.nlp.sudachi.diff.DiffDetails.Companion.renderDiff
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.*
-import kotlin.io.path.outputStream
-import kotlin.io.path.relativeTo
+import kotlin.io.path.*
 
 class DiffStatistics(private val outputRoot: Path) {
     private data class SpanLocation(val path: Path, val id: String)
@@ -67,6 +66,7 @@ class DiffStatistics(private val outputRoot: Path) {
     }
 
     fun writeStatistics() {
+        outputRoot.createDirectories()
         val index = outputRoot.resolve("index.html")
         index.outputStream(CREATE, WRITE, TRUNCATE_EXISTING).use { os ->
             os.bufferedWriter().use {
@@ -107,6 +107,7 @@ class DiffStatistics(private val outputRoot: Path) {
                 }
             }
             div ("index-content") {
+                var nwritten = 0
                 for (level in 0 until SudachiToken.MAX_LEVEL) {
                     val entries = byLevel[level]
                     if (entries.isEmpty()) {
@@ -125,8 +126,12 @@ class DiffStatistics(private val outputRoot: Path) {
                         val sorted = entries.toList().sortedByDescending { it.second.size }
                         for ((span, locations) in sorted.take(requestedNum)) {
                              renderItem(span, locations, level)
+                            nwritten += 1
                         }
                     }
+                }
+                if (nwritten == 0) {
+                    p { +"Completely identical" }
                 }
             }
         }

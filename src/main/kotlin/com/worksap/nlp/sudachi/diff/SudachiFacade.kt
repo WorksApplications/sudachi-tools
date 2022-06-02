@@ -1,4 +1,4 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import java.net.URL
 import java.net.URLClassLoader
@@ -50,7 +50,7 @@ class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
     }
 
     // this classloader needs to load
-    // 1. SudachiRuntime
+    // 1. Classes from com.worksap.nlp.sudachi.diff.iface package
     // 2. Everything from sudachi jars
     // before parent classloaders
     private val classloader = object : URLClassLoader("SudachiLoader", jars, this.javaClass.classLoader) {
@@ -63,7 +63,7 @@ class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
                 return loaded
             }
             try {
-                if (name.startsWith("org.eiennohito.sudachi.diff.iface.")) {
+                if (name.startsWith("com.worksap.nlp.sudachi.diff.iface.")) {
                     val path = name.replace(".", "/") + ".class"
                     val resource = parent.getResource(path)!!
                     val bytes = resource.readBytes()
@@ -78,11 +78,10 @@ class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
 
     fun process(input: Path, output: Path) {
         // runtime will be loaded by explicit classloader here, we should operate with it only via reflection
-        val runtime = classloader.loadClass("org.eiennohito.sudachi.diff.iface.SudachiRuntime")
+        val runtime = classloader.loadClass("com.worksap.nlp.sudachi.diff.iface.SudachiRuntime")
         val constructor = runtime.getConstructor(ClassLoader::class.java, SudachiRuntimeConfig::class.java)
-        val instance = constructor.newInstance(classloader, config)
-        val runMethod = runtime.getDeclaredMethod("run", Path::class.java, Path::class.java)
-        runMethod.invoke(instance, input, output)
+        val instance = constructor.newInstance(classloader, config) as SuRuntime
+        instance.run(input, output)
         classloader.close()
     }
 }

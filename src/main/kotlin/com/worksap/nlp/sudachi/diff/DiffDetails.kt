@@ -1,9 +1,10 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.nio.file.StandardOpenOption.*
 import kotlin.io.path.bufferedWriter
 import kotlin.io.path.createDirectories
 import kotlin.io.path.deleteIfExists
@@ -17,9 +18,9 @@ class DiffDetails(private val outputPath: Path, private val resources: Path) {
 
     companion object {
         inline fun SPAN.renderTokens(
-            tokens: List<SudachiToken>,
-            block: SPAN.(SudachiToken) -> Unit,
-            separator: SPAN.() -> Unit
+          tokens: List<SudachiToken>,
+          block: SPAN.(SudachiToken) -> Unit,
+          separator: SPAN.() -> Unit
         ) {
             tokens.forEachIndexed { idx, token ->
                 block(this, token)
@@ -66,10 +67,9 @@ class DiffDetails(private val outputPath: Path, private val resources: Path) {
         }
 
         outputPath.parent.createDirectories()
-        outputPath.deleteIfExists()
 
         val out =
-            outputPath.bufferedWriter(Charsets.UTF_8, 32 * 1024, StandardOpenOption.CREATE, StandardOpenOption.WRITE)
+            outputPath.bufferedWriter(Charsets.UTF_8, 32 * 1024, CREATE, WRITE, TRUNCATE_EXISTING)
 
         out.appendHTML().html {
             lang = "ja"

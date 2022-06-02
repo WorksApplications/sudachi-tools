@@ -1,4 +1,4 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import java.io.InputStream
 import java.nio.charset.StandardCharsets

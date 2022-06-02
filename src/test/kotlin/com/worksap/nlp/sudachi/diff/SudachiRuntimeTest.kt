@@ -1,6 +1,6 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
-import com.woksap.nlp.sudachi.diff.iface.SudachiRuntime
+import com.worksap.nlp.sudachi.diff.iface.SudachiRuntime
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

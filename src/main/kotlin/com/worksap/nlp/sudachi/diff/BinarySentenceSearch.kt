@@ -1,4 +1,4 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 class BinarySentenceSearch {
     private var data: ByteArray = ByteArray(0)

@@ -1,4 +1,4 @@
-package com.woksap.nlp.sudachi.diff
+package com.worksap.nlp.sudachi.diff
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
