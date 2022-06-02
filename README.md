@@ -32,14 +32,27 @@ The jar with dependencies will be in `build/libs` directory.
 
 # Usage
 
-## Analyzis
+## Analysis
 
 You need to download Sudachi and its dictionary.
-The example invocation for
+The example invocation for analyzing is the following.
+The analysis results will be placed in `/path/to/output` directory.
 ```bash
 java -jar sudachi-tools.jar analyze \
     --output /path/to/output \
     --jar /path/to/sudachi.jar \
     --config /path/to/sudachi.conf
     /path/to/input/data
+```
+
+## Computing Diffs
+
+The invocation is the following. Directory `/path/to/diffs` will contain html report with diffs.
+Inputs must be the analysis results from the analysis step.
+
+```bash
+java -jar sudachi-tools.jar diff \
+    /path/to/analysis1 \
+    /path/to/analysis2 \
+    /path/to/diffs
 ```
