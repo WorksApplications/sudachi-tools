@@ -41,7 +41,7 @@ The analysis results will be placed in `/path/to/output` directory.
 java -jar sudachi-tools.jar analyze \
     --output /path/to/output \
     --jar /path/to/sudachi.jar \
-    --config /path/to/sudachi.conf
+    --config /path/to/sudachi.json
     /path/to/input/data
 ```
 
