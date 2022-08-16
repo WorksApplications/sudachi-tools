@@ -9,9 +9,7 @@ import kotlin.io.path.name
 import kotlin.io.path.notExists
 
 data class SudachiRuntimeConfig(
-    val sudachiJar: Path?,
-    val javaxJsonJar: Path?,
-    val jdartsCloneJar: Path?,
+    val classpath: List<Path>,
     val sudachiConfigFile: Path?,
     val addSettings: String = "{}"
 )
@@ -22,32 +20,9 @@ private fun Path.absoluteUrl(): URL {
     }
     return absolute().toUri().toURL()
 }
-
-private fun resolve(first: Path?, base: Path, namePart: String): URL? {
-    if (first != null) {
-        return first.absoluteUrl()
-    }
-    val parentDir = base.parent
-    val found = Files.find(parentDir, 1, { p, _ -> p.name.contains(namePart) }).findFirst()
-    if (found.isEmpty) {
-        return null
-    }
-    return found.get().absoluteUrl()
-}
-
 class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
-    private val jars = kotlin.run {
-        val jars = ArrayList<URL>()
-        if (config.sudachiJar == null) {
-            config.javaxJsonJar?.let { jars.add(it.absoluteUrl()) }
-            config.jdartsCloneJar?.let { jars.add(it.absoluteUrl()) }
-        } else {
-            jars.add(config.sudachiJar.absoluteUrl())
-            resolve(config.jdartsCloneJar, config.sudachiJar, "jdartsclone")?.let { jars.add(it) }
-            resolve(config.javaxJsonJar, config.sudachiJar, "javax.json")?.let { jars.add(it) }
-        }
-        jars.toArray(emptyArray<URL>())
-    }
+    private val jars = config.classpath.map { it.toUri().toURL() }.toTypedArray()
+
 
     // this classloader needs to load
     // 1. Classes from com.worksap.nlp.sudachi.diff.iface package
