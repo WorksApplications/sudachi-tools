@@ -1,14 +1,14 @@
 package com.worksap.nlp.sudachi.diff
 
+import com.worksap.nlp.sudachi.diff.analyze.SudachiSupport
 import kotlinx.cli.*
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.function.BiPredicate
 import java.util.logging.LogManager
 import kotlin.io.path.name
 import kotlin.io.path.notExists
 
-private fun String.existingPath(): Path {
+fun String.existingPath(): Path {
     val path = Path.of(this)
     if (path.notExists()) {
         throw IllegalArgumentException("File $path does not exist")
@@ -34,10 +34,23 @@ object Main {
             val output by option(ArgType.String, description = "path for outputting analyzed files").required()
             val jar by option(ArgType.String, description = "path to sudachi jar file")
             val config by option(ArgType.String, description = "path to sudachi configuration")
+            val filter by option(ArgType.String, description = "file filter to analyze, *.txt by default")
+            val cacheDirectory by option(ArgType.String, description = "cache directory, by default ~/.local/cache/sudachi-tools")
+
+            private fun resolveCacheDirectory(value: String?): Path {
+                if (value != null) {
+                    return Path.of(value)
+                }
+                val homeDir = run {
+                    val homeVar = System.getenv("HOME")
+                    homeVar ?: System.getenv("USERPROFILE")
+                }
+                return Path.of(homeDir).resolve(".local/cache/sudachi-tools")
+            }
 
             override fun execute() {
-                val cfg = SudachiRuntimeConfig(jar?.existingPath(), null, null, config?.existingPath())
-                val runner = SudachiAnalysisTaskRunner(cfg)
+                val support = SudachiSupport(resolveCacheDirectory(cacheDirectory))
+                val runner = SudachiAnalysisTaskRunner(support.config(jar, config))
                 runner.process(input.existingPath(), Path.of(output))
             }
         }

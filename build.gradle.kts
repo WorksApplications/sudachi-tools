@@ -2,7 +2,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.6.21"
+    kotlin("jvm") version "1.7.10"
     id("me.champeau.jmh") version "0.6.6"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
@@ -17,8 +17,8 @@ repositories {
 dependencies {
     compileOnly("com.worksap.nlp:sudachi:0.5.3")
     testImplementation("com.worksap.nlp:sudachi:0.5.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.5")
     implementation("com.github.luben:zstd-jni:1.5.2-3")
     implementation("com.google.guava:guava:31.1-jre")
@@ -33,7 +33,6 @@ tasks.test {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
-    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
 }
 
 tasks.withType<ShadowJar> {
