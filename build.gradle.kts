@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.worskap.nlp"
-version = "0.2-SNAPSHOT"
+version = "0.2"
 
 repositories {
     mavenCentral()
