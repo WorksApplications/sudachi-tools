@@ -4,6 +4,7 @@ import com.worksap.nlp.sudachi.Config
 import com.worksap.nlp.sudachi.Dictionary
 import com.worksap.nlp.sudachi.DictionaryFactory
 import com.worksap.nlp.sudachi.Morpheme
+import com.worksap.nlp.sudachi.PathAnchor
 import com.worksap.nlp.sudachi.Tokenizer.SplitMode
 import com.worksap.nlp.sudachi.dictionary.WordInfo
 import com.worksap.nlp.sudachi.diff.*
@@ -17,7 +18,8 @@ import kotlin.io.path.readText
 class SudachiRuntime(private val classloader: ClassLoader, private val config: SudachiRuntimeConfig): SuRuntime {
     private fun makeSudachiInstanceFromConfig(): Dictionary {
         val suConf = if (config.sudachiConfigFile != null) {
-            Config.fromFile(config.sudachiConfigFile).withFallback(Config.defaultConfig())
+            val anchor = PathAnchor.filesystem(config.sudachiConfigFile.parent).andThen(PathAnchor.classpath(classloader))
+            Config.fromFile(config.sudachiConfigFile, anchor).withFallback(Config.defaultConfig())
         } else {
             Config.defaultConfig()
         }
