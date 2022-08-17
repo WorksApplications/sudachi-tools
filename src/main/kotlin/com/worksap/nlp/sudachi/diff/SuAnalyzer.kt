@@ -8,5 +8,5 @@ interface SuAnalyzer {
 
 interface SuRuntime {
     fun analyzer(mode: String = "C"): SuAnalyzer
-    fun run(input: Path, output: Path): Unit
+    fun run(input: Path, output: Path, filter: String): Unit
 }

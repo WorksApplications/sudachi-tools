@@ -1,5 +1,6 @@
 package com.worksap.nlp.sudachi.diff.analyze
 
+import com.worksap.nlp.sudachi.diff.SudachiAdditionalSettings
 import com.worksap.nlp.sudachi.diff.SudachiRuntimeConfig
 import com.worksap.nlp.sudachi.diff.existingPath
 import org.w3c.dom.Node
@@ -20,9 +21,9 @@ import kotlin.io.path.*
 class SudachiSupport(root: Path) {
     private val downloader = SudachiDownloader(root)
 
-    fun config(jar: String?, config: String?): SudachiRuntimeConfig {
+    fun config(jar: String?, config: String?, additionalSettings: SudachiAdditionalSettings? = null): SudachiRuntimeConfig {
         val cpath = resolveJar(jar)
-        return SudachiRuntimeConfig(cpath, config?.existingPath())
+        return SudachiRuntimeConfig(cpath, config?.existingPath(), addSettings2 = additionalSettings)
     }
 
     private fun resolveJar(jar: String?): List<Path> {

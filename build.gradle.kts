@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.worksap.nlp:sudachi:0.5.3")
-    testImplementation("com.worksap.nlp:sudachi:0.5.3")
+    compileOnly("com.worksap.nlp:sudachi:0.6.2")
+    testImplementation("com.worksap.nlp:sudachi:0.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-html:0.7.5")
