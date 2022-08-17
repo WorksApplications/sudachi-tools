@@ -5,6 +5,7 @@ import com.worksap.nlp.sudachi.diff.SudachiRuntimeConfig
 import com.worksap.nlp.sudachi.diff.existingPath
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
+import java.io.ByteArrayInputStream
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -21,7 +22,11 @@ import kotlin.io.path.*
 class SudachiResolver(root: Path) {
     private val downloader = SudachiDownloader(root)
 
-    fun config(jar: String?, config: String?, additionalSettings: SudachiAdditionalSettings? = null): SudachiRuntimeConfig {
+    fun config(
+        jar: String?,
+        config: String?,
+        additionalSettings: SudachiAdditionalSettings? = null
+    ): SudachiRuntimeConfig {
         val cpath = resolveJar(jar)
         return SudachiRuntimeConfig(cpath, config?.existingPath(), addSettings2 = additionalSettings)
     }
@@ -75,7 +80,7 @@ class SudachiResolver(root: Path) {
     }
 }
 
-class NodesIterator(private val list: NodeList): Iterator<Node> {
+class NodesIterator(private val list: NodeList) : Iterator<Node> {
     private var index = 0
     private var total = list.length
     override fun hasNext(): Boolean = index < total
@@ -149,6 +154,60 @@ class CacheLocation(root: Path, private val downloader: SudachiDownloader, val c
             CompletableFuture.allOf(*futures.toTypedArray()).get(5, TimeUnit.MINUTES)
         }
     }
+
+    fun maybeDownloadLatestSnapshot(client: HttpClient) {
+        val snapshotVersion = resolveSnapshotVersion(client)
+
+        System.err.println("Using ${coords.organization}:${coords.name} with snapshot version $snapshotVersion")
+
+        val localVersionFile = directory.resolve("${coords.name}-${coords.version}.ACTUAL")
+        val localVersion = if (localVersionFile.exists()) {
+            localVersionFile.readText()
+        } else { "" }
+
+        if (snapshotVersion != localVersion || pom.notExists() || jar.notExists()) {
+            directory.createDirectories()
+            val futures = sequence {
+                if (true) {
+                    val uri = URI(coords.snapshotUrl(snapshotVersion, "pom"))
+                    val req = HttpRequest.newBuilder(uri).GET().build()
+                    yield(client.sendAsync(req, downloadHandler(uri, pom)))
+                }
+
+                if (true) {
+                    val uri = URI(coords.snapshotUrl(snapshotVersion, "jar"))
+                    val req = HttpRequest.newBuilder(uri).GET().build()
+                    yield(client.sendAsync(req, downloadHandler(uri, jar)))
+                }
+            }.toList()
+
+            if (futures.isNotEmpty()) {
+                CompletableFuture.allOf(*futures.toTypedArray()).get(5, TimeUnit.MINUTES)
+                localVersionFile.writeText(snapshotVersion)
+            }
+        }
+    }
+
+    private fun resolveSnapshotVersion(client: HttpClient): String {
+        val url = URI(coords.snapshotMetadataUrl(true))
+        val req = HttpRequest.newBuilder(url).GET().header("User-Agent", "SudachiTools/0.1").build()
+        val response = client.send(req) { BodySubscribers.ofByteArray() }
+        if (response.statusCode() != 200) {
+            throw IllegalStateException("failed to download $url, status code ${response.statusCode()}")
+        }
+        val doc = downloader.xmlParser.parse(ByteArrayInputStream(response.body()))
+        val versionElem = doc.getElementsByTagName("snapshotVersion")
+
+        for (n1 in NodesIterator(versionElem)) {
+            for (n2 in NodesIterator(n1.childNodes)) {
+                if (n2.nodeName == "value") {
+                    return n2.textContent
+                }
+            }
+        }
+
+        throw IllegalStateException("failed to get snapshot version from maven-metadata.xml")
+    }
 }
 
 data class MavenCoordinates(
@@ -162,10 +221,28 @@ data class MavenCoordinates(
         val orgPath = organization.replace('.', '/')
         return "https://repo1.maven.org/maven2/$orgPath/$name/$version/$name-$version.$extension"
     }
+
+    fun snapshotUrl(actualVersion: String, extension: String): String {
+        val orgPath = organization.replace('.', '/')
+        return "https://oss.sonatype.org/content/repositories/snapshots/$orgPath/$name/$version/$name-$actualVersion.$extension"
+    }
+
+    fun snapshotMetadataUrl(versioned: Boolean): String {
+        val orgPath = organization.replace('.', '/')
+        return if (versioned) {
+            "https://oss.sonatype.org/content/repositories/snapshots/$orgPath/$name/$version/maven-metadata.xml"
+        } else {
+            "https://oss.sonatype.org/content/repositories/snapshots/$orgPath/$name/maven-metadata.xml"
+        }
+    }
 }
 
 class SudachiDownloader(private val root: Path) {
-    private val client by lazy { HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build() }
+    private val client by lazy {
+        HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.ALWAYS)
+            .build()
+    }
     internal val xmlParser = run {
         val f = DocumentBuilderFactory.newInstance()
         f.isIgnoringComments = true
@@ -181,7 +258,7 @@ class SudachiDownloader(private val root: Path) {
     }
 
     fun tryToResolveJar(name: String, version: String): Sequence<Path> {
-        val org = when(name) {
+        val org = when (name) {
             "sudachi" -> "com.worksap.nlp"
             "jdartsclone" -> "com.worksap.nlp"
             "javax.json" -> "org.glassfish"
@@ -208,7 +285,7 @@ class SudachiDownloader(private val root: Path) {
 
     private fun refresh(loc: CacheLocation) {
         if (loc.coords.isSnapshot()) {
-            TODO()
+            loc.maybeDownloadLatestSnapshot(client)
         } else {
             loc.maybeDownloadReleaseArtifacts(client)
         }
