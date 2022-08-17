@@ -39,11 +39,19 @@ The example invocation for analyzing is the following.
 The analysis results will be placed in `/path/to/output` directory.
 ```bash
 java -jar sudachi-tools.jar analyze \
-    --output /path/to/output \
     --jar /path/to/sudachi.jar \
-    --config /path/to/sudachi.json
+    --config /path/to/sudachi.json \
+    --mode C \
+    --output /path/to/output \
+    --filter '*.txt' \
     /path/to/input/data
 ```
+
+It is also possible specify version of Sudachi instead of file: `--jar v0.6.2`.
+In this case, Sudachi will be automatically downloaded from Maven repository.
+Snapshots builds are also supported: `--jar v0.7.1-SNAPSHOT`, in this case 
+snapshot version will be checked each time, ensuring the execution with the latest snapshot.
+
 
 ## Computing Diffs
 
@@ -55,4 +63,16 @@ java -jar sudachi-tools.jar diff \
     /path/to/analysis1 \
     /path/to/analysis2 \
     /path/to/diffs
+```
+
+## Debug
+
+Debug mode which analyzes stdin with the given Sudachi version and config.
+In this mode, lattice dump is outputted as well.
+
+```bash
+java -jar sudachi-tools.jar debug \
+    --jar /path/to/sudachi.jar \
+    --config /path/to/sudachi.json \
+    --mode C
 ```
