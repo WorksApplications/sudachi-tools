@@ -1,6 +1,6 @@
 package com.worksap.nlp.sudachi.diff
 
-import com.worksap.nlp.sudachi.diff.analyze.SudachiSupport
+import com.worksap.nlp.sudachi.diff.analyze.SudachiResolver
 import kotlinx.cli.*
 import java.nio.file.Files
 import java.nio.file.Path
@@ -52,7 +52,7 @@ object Main {
 
             override fun execute() {
                 val addSettings = SudachiAdditionalSettings(systemDict?.existingPath(), userDict.map { it.existingPath() })
-                val support = SudachiSupport(resolveCacheDirectory(cacheDirectory))
+                val support = SudachiResolver(resolveCacheDirectory(cacheDirectory))
                 val runner = SudachiAnalysisTaskRunner(support.config(jar, config, addSettings))
                 runner.process(input.existingPath(), Path.of(output), filter ?: "*.txt")
             }

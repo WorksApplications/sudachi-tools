@@ -18,7 +18,7 @@ import java.util.jar.JarFile
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.*
 
-class SudachiSupport(root: Path) {
+class SudachiResolver(root: Path) {
     private val downloader = SudachiDownloader(root)
 
     fun config(jar: String?, config: String?, additionalSettings: SudachiAdditionalSettings? = null): SudachiRuntimeConfig {
