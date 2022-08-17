@@ -15,10 +15,11 @@ import java.nio.file.Path
 import kotlin.io.path.name
 import kotlin.io.path.readText
 
-class SudachiRuntime(private val classloader: ClassLoader, private val config: SudachiRuntimeConfig): SuRuntime {
+class SudachiRuntime(private val classloader: ClassLoader, private val config: SudachiRuntimeConfig) : SuRuntime {
     private fun makeSudachiInstanceFromConfig(): Dictionary {
         val suConf = if (config.sudachiConfigFile != null) {
-            val anchor = PathAnchor.filesystem(config.sudachiConfigFile.parent).andThen(PathAnchor.classpath(classloader))
+            val anchor =
+                PathAnchor.filesystem(config.sudachiConfigFile.parent).andThen(PathAnchor.classpath(classloader))
             Config.fromFile(config.sudachiConfigFile, anchor).withFallback(Config.defaultConfig())
         } else {
             Config.defaultConfig()
@@ -36,16 +37,15 @@ class SudachiRuntime(private val classloader: ClassLoader, private val config: S
         }
     }
 
-    val sudachiDic: Dictionary = run {
-        try {
-            makeSudachiInstanceFromConfig()
-        } catch (e: Throwable) {
-            when (e) {
-                is NoClassDefFoundError, is NoSuchMethodError -> makeSudachiInstanceLegacy()
-                else -> throw e
-            }
+    val sudachiDic: Dictionary = try {
+        makeSudachiInstanceFromConfig()
+    } catch (e: Throwable) {
+        when (e) {
+            is NoClassDefFoundError, is NoSuchMethodError -> makeSudachiInstanceLegacy()
+            else -> throw e
         }
     }
+
 
     private val wordInfoHandle = kotlin.run {
         val morphemeImplClass = classloader.loadClass("com.worksap.nlp.sudachi.MorphemeImpl")
@@ -68,13 +68,14 @@ class SudachiRuntime(private val classloader: ClassLoader, private val config: S
 
         val filterRegex = Regex(filter.replace("*", ".*"))
 
-        Files.find(input, Int.MAX_VALUE, { p, attrs -> attrs.isRegularFile && filterRegex.matchEntire(p.name) != null }).use {
-            it.forEach { p -> analyzer.enqueue(p) }
-        }
+        Files.find(input, Int.MAX_VALUE, { p, attrs -> attrs.isRegularFile && filterRegex.matchEntire(p.name) != null })
+            .use {
+                it.forEach { p -> analyzer.enqueue(p) }
+            }
         analyzer.waitForCompletion()
     }
 
-    override fun analyzer(mode: String): SuAnalyzer {
-        return SudachiAnalyzer(this, mode)
+    override fun analyzer(mode: String?): SuAnalyzer {
+        return SudachiAnalyzer(this, mode ?: config.mode)
     }
 }

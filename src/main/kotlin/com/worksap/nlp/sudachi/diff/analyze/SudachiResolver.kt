@@ -25,10 +25,11 @@ class SudachiResolver(root: Path) {
     fun config(
         jar: String?,
         config: String?,
-        additionalSettings: SudachiAdditionalSettings? = null
+        additionalSettings: SudachiAdditionalSettings? = null,
+        mode: String = "C"
     ): SudachiRuntimeConfig {
         val cpath = resolveJar(jar)
-        return SudachiRuntimeConfig(cpath, config?.existingPath(), addSettings2 = additionalSettings)
+        return SudachiRuntimeConfig(cpath, config?.existingPath(), addSettings2 = additionalSettings, mode = mode)
     }
 
     private fun resolveJar(jar: String?): List<Path> {

@@ -26,18 +26,13 @@ object Main {
 
         val parser = ArgParser("sudachi-cli")
 
-        class Analyze : Subcommand("analyze", "analyze a text corpus with provided jar and dictionary") {
-            val input by argument(
-                ArgType.String,
-                description = "directory with input text files, one sentence per line"
-            )
-            val output by option(ArgType.String, description = "path for outputting analyzed files").required()
+        abstract class AnalyzeBase(name: String, description: String): Subcommand(name, description) {
             val jar by option(ArgType.String, description = "path to sudachi jar file")
             val config by option(ArgType.String, description = "path to sudachi configuration")
-            val filter by option(ArgType.String, description = "file filter to analyze, *.txt by default")
             val cacheDirectory by option(ArgType.String, description = "cache directory, by default ~/.local/cache/sudachi-tools")
             val systemDict by option(ArgType.String, description = "system dictionary to use instead of the configured one (Sudachi 0.6.0+)")
             val userDict by option(ArgType.String, description = "additional user dictionary (Sudachi 0.6.0+)").multiple()
+            val mode by option(ArgType.Choice(listOf("A", "B", "C"), {it}), description = "sudachi analysis mode").default("C")
 
             private fun resolveCacheDirectory(value: String?): Path {
                 if (value != null) {
@@ -50,11 +45,31 @@ object Main {
                 return Path.of(homeDir).resolve(".local/cache/sudachi-tools")
             }
 
-            override fun execute() {
+            protected fun sudachiConfig(): SudachiRuntimeConfig {
                 val addSettings = SudachiAdditionalSettings(systemDict?.existingPath(), userDict.map { it.existingPath() })
                 val support = SudachiResolver(resolveCacheDirectory(cacheDirectory))
-                val runner = SudachiAnalysisTaskRunner(support.config(jar, config, addSettings))
+                return support.config(jar, config, addSettings, mode)
+            }
+        }
+
+        class Analyze : AnalyzeBase("analyze", "analyze a text corpus with provided jar and dictionary") {
+            val input by argument(
+                ArgType.String,
+                description = "directory with input text files, one sentence per line"
+            )
+            val output by option(ArgType.String, description = "path for outputting analyzed files").required()
+            val filter by option(ArgType.String, description = "file filter to analyze, *.txt by default")
+
+            override fun execute() {
+                val runner = SudachiAnalysisTaskRunner(sudachiConfig())
                 runner.process(input.existingPath(), Path.of(output), filter ?: "*.txt")
+            }
+        }
+
+        class Debug : AnalyzeBase("debug", "run sudachi in debug mode (interactive analysis)") {
+            override fun execute() {
+                val runner = SudachiAnalysisTaskRunner(sudachiConfig())
+                runner.interactiveDebug(System.`in`, mode)
             }
         }
 
@@ -85,7 +100,7 @@ object Main {
         }
 
 
-        parser.subcommands(Analyze(), Diff())
+        parser.subcommands(Analyze(), Diff(), Debug())
         parser.parse(args)
     }
 }

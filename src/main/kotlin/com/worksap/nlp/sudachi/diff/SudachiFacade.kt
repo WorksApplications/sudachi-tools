@@ -1,11 +1,10 @@
 package com.worksap.nlp.sudachi.diff
 
+import java.io.InputStream
 import java.net.URL
 import java.net.URLClassLoader
-import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.absolute
-import kotlin.io.path.name
 import kotlin.io.path.notExists
 
 data class SudachiAdditionalSettings(
@@ -17,7 +16,8 @@ data class SudachiRuntimeConfig(
     val classpath: List<Path>,
     val sudachiConfigFile: Path?,
     val addSettings: String = "{}",
-    val addSettings2: SudachiAdditionalSettings? = null
+    val addSettings2: SudachiAdditionalSettings? = null,
+    val mode: String = "C"
 )
 
 private fun Path.absoluteUrl(): URL {
@@ -26,6 +26,7 @@ private fun Path.absoluteUrl(): URL {
     }
     return absolute().toUri().toURL()
 }
+
 class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
     private val jars = config.classpath.map { it.toUri().toURL() }.toTypedArray()
 
@@ -64,5 +65,14 @@ class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
         val instance = constructor.newInstance(classloader, config) as SuRuntime
         instance.run(input, output, filter)
         classloader.close()
+    }
+
+    fun interactiveDebug(data: InputStream, mode: String) {
+        val runtime = classloader.loadClass("com.worksap.nlp.sudachi.diff.iface.SudachiRuntime")
+        val constructor = runtime.getConstructor(ClassLoader::class.java, SudachiRuntimeConfig::class.java)
+        val instance = constructor.newInstance(classloader, config) as SuRuntime
+        val analyzer = instance.analyzer(mode)
+        val reader = data.bufferedReader()
+        reader.lines().use { it.forEach { s -> analyzer.analyzeSentence(s, System.out, true) } }
     }
 }
