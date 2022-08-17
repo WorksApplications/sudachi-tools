@@ -36,6 +36,8 @@ object Main {
             val config by option(ArgType.String, description = "path to sudachi configuration")
             val filter by option(ArgType.String, description = "file filter to analyze, *.txt by default")
             val cacheDirectory by option(ArgType.String, description = "cache directory, by default ~/.local/cache/sudachi-tools")
+            val systemDict by option(ArgType.String, description = "system dictionary to use instead of the configured one (Sudachi 0.6.0+)")
+            val userDict by option(ArgType.String, description = "additional user dictionary (Sudachi 0.6.0+)").multiple()
 
             private fun resolveCacheDirectory(value: String?): Path {
                 if (value != null) {
@@ -49,9 +51,10 @@ object Main {
             }
 
             override fun execute() {
+                val addSettings = SudachiAdditionalSettings(systemDict?.existingPath(), userDict.map { it.existingPath() })
                 val support = SudachiSupport(resolveCacheDirectory(cacheDirectory))
-                val runner = SudachiAnalysisTaskRunner(support.config(jar, config))
-                runner.process(input.existingPath(), Path.of(output))
+                val runner = SudachiAnalysisTaskRunner(support.config(jar, config, addSettings))
+                runner.process(input.existingPath(), Path.of(output), filter ?: "*.txt")
             }
         }
 

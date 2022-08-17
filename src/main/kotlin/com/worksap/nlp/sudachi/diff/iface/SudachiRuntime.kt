@@ -1,5 +1,6 @@
 package com.worksap.nlp.sudachi.diff.iface
 
+import com.worksap.nlp.sudachi.Config
 import com.worksap.nlp.sudachi.Dictionary
 import com.worksap.nlp.sudachi.DictionaryFactory
 import com.worksap.nlp.sudachi.Morpheme
@@ -13,15 +14,34 @@ import java.nio.file.Path
 import kotlin.io.path.name
 import kotlin.io.path.readText
 
-class SudachiRuntime(private val classloader: ClassLoader, config: SudachiRuntimeConfig): SuRuntime {
-    val sudachiDic: Dictionary = kotlin.run {
-        val sudachiFactory = classloader.loadClass("com.worksap.nlp.sudachi.DictionaryFactory")
-        val factory = sudachiFactory.getDeclaredConstructor().newInstance() as DictionaryFactory
-        if (config.sudachiConfigFile != null) {
+class SudachiRuntime(private val classloader: ClassLoader, private val config: SudachiRuntimeConfig): SuRuntime {
+    private fun makeSudachiInstanceFromConfig(): Dictionary {
+        val suConf = if (config.sudachiConfigFile != null) {
+            Config.fromFile(config.sudachiConfigFile).withFallback(Config.defaultConfig())
+        } else {
+            Config.defaultConfig()
+        }
+        return DictionaryFactory().create(suConf)
+    }
+
+    private fun makeSudachiInstanceLegacy(): Dictionary {
+        val factory = DictionaryFactory()
+        return if (config.sudachiConfigFile != null) {
             val cfgData = config.sudachiConfigFile.readText()
             factory.create(config.sudachiConfigFile.parent.toString(), cfgData, true)
         } else {
-            factory.create(config.sudachiConfigFile?.parent.toString(), config.addSettings, true)
+            factory.create(null, config.addSettings, true)
+        }
+    }
+
+    val sudachiDic: Dictionary = run {
+        try {
+            makeSudachiInstanceFromConfig()
+        } catch (e: Throwable) {
+            when (e) {
+                is NoClassDefFoundError, is NoSuchMethodError -> makeSudachiInstanceLegacy()
+                else -> throw e
+            }
         }
     }
 
@@ -40,10 +60,13 @@ class SudachiRuntime(private val classloader: ClassLoader, config: SudachiRuntim
         return SplitMode.valueOf(mode)
     }
 
-    override fun run(input: Path, output: Path) {
+    override fun run(input: Path, output: Path, filter: String) {
         val segmenter = FileSegmenter(5 * 1024 * 1024, 32 * 1024)
         val analyzer = AnalyzerManager(this, segmenter, input, output)
-        Files.find(input, Int.MAX_VALUE, { p, attrs -> attrs.isRegularFile && p.name.endsWith(".txt") }).use {
+
+        val filterRegex = Regex(filter.replace("*", ".*"))
+
+        Files.find(input, Int.MAX_VALUE, { p, attrs -> attrs.isRegularFile && filterRegex.matchEntire(p.name) != null }).use {
             it.forEach { p -> analyzer.enqueue(p) }
         }
         analyzer.waitForCompletion()

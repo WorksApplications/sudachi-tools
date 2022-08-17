@@ -8,10 +8,16 @@ import kotlin.io.path.absolute
 import kotlin.io.path.name
 import kotlin.io.path.notExists
 
+data class SudachiAdditionalSettings(
+    val systemDict: Path? = null,
+    val userDicts: List<Path> = emptyList(),
+)
+
 data class SudachiRuntimeConfig(
     val classpath: List<Path>,
     val sudachiConfigFile: Path?,
-    val addSettings: String = "{}"
+    val addSettings: String = "{}",
+    val addSettings2: SudachiAdditionalSettings? = null
 )
 
 private fun Path.absoluteUrl(): URL {
@@ -51,12 +57,12 @@ class SudachiAnalysisTaskRunner(private val config: SudachiRuntimeConfig) {
         }
     }
 
-    fun process(input: Path, output: Path) {
+    fun process(input: Path, output: Path, filter: String) {
         // runtime will be loaded by explicit classloader here, we should operate with it only via reflection
         val runtime = classloader.loadClass("com.worksap.nlp.sudachi.diff.iface.SudachiRuntime")
         val constructor = runtime.getConstructor(ClassLoader::class.java, SudachiRuntimeConfig::class.java)
         val instance = constructor.newInstance(classloader, config) as SuRuntime
-        instance.run(input, output)
+        instance.run(input, output, filter)
         classloader.close()
     }
 }
