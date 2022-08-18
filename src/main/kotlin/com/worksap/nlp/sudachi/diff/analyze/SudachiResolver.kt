@@ -15,6 +15,7 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import java.util.jar.Attributes
 import java.util.jar.JarFile
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.io.path.*
@@ -53,7 +54,8 @@ class SudachiResolver(root: Path) {
     private fun resolveInDirectoryClasspath(pjar: Path): List<Path> {
         val manifest = JarFile(pjar.toFile()).manifest
         val result = ArrayList<Path>()
-        val classPath = manifest.mainAttributes["Class-Path"]
+        result.add(pjar)
+        val classPath = manifest.mainAttributes.getValue(Attributes.Name.CLASS_PATH)
         if (classPath != null) {
             val entries = classPath.toString().split(' ')
             val parent = pjar.parent
