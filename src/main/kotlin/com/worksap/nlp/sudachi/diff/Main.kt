@@ -24,10 +24,10 @@ object Main {
 
         LogManager.getLogManager().readConfiguration(Main::class.java.getResourceAsStream("/logging.properties"))
 
-        val parser = ArgParser("sudachi-cli")
+        val parser = ArgParser("sudachi-tools", prefixStyle = ArgParser.OptionPrefixStyle.GNU)
 
         abstract class AnalyzeBase(name: String, description: String): Subcommand(name, description) {
-            val jar by option(ArgType.String, description = "path to sudachi jar file")
+            val jar by option(ArgType.String, description = "path to sudachi jar file or sudachi version starting with v (e.g. v0.6.2)")
             val config by option(ArgType.String, description = "path to sudachi configuration")
             val cacheDirectory by option(ArgType.String, description = "cache directory, by default ~/.local/cache/sudachi-tools")
             val systemDict by option(ArgType.String, description = "system dictionary to use instead of the configured one (Sudachi 0.6.0+)")
