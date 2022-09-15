@@ -24,6 +24,10 @@ class SudachiRuntime(private val classloader: ClassLoader, private val config: S
         } else {
             Config.defaultConfig()
         }
+        config.addSettings2?.let { s ->
+            s.systemDict?.let { suConf.systemDictionary(it) }
+            s.userDicts.forEach { suConf.addUserDictionary(it) }
+        }
         return DictionaryFactory().create(suConf)
     }
 
