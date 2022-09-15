@@ -24,7 +24,7 @@ object Main {
 
         LogManager.getLogManager().readConfiguration(Main::class.java.getResourceAsStream("/logging.properties"))
 
-        val parser = ArgParser("sudachi-tools", prefixStyle = ArgParser.OptionPrefixStyle.GNU)
+        val parser = ArgParser("sudachi-tools", prefixStyle = ArgParser.OptionPrefixStyle.LINUX)
 
         abstract class AnalyzeBase(name: String, description: String): Subcommand(name, description) {
             val jar by option(ArgType.String, description = "path to sudachi jar file or sudachi version starting with v (e.g. v0.6.2)")
